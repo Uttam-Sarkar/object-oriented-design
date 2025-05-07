@@ -1,0 +1,20 @@
+#define SYSTICK_BASE  0xE000E010
+#define SYSTICK_CTRL  (*(volatile unsigned int *)(SYSTICK_BASE + 0x0))
+#define SYSTICK_LOAD  (*(volatile unsigned int *)(SYSTICK_BASE + 0x4))
+#define SYSTICK_VAL   (*(volatile unsigned int *)(SYSTICK_BASE + 0x8))
+
+void delay_ms(uint32_t ms) {
+    // Assuming 16 MHz clock
+    SYSTICK_LOAD = 16000 - 1;  // 1 ms = 16000 ticks
+    SYSTICK_VAL = 0;
+    SYSTICK_CTRL = 5; // Enable SysTick, no interrupt
+
+    for (uint32_t i = 0; i < ms; i++) {
+        while ((SYSTICK_CTRL & (1 << 16)) == 0); // Wait for COUNTFLAG
+    }
+
+    SYSTICK_CTRL = 0; // Disable SysTick
+}
+
+
+//delay_ms(2000); 
